@@ -1,0 +1,60 @@
+<html layout:decorate="~{layouts/default.html}" xmlns:th="http://www.thymeleaf.org">
+<head>
+<!-- Required meta tags -->
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+<!-- Bootstrap CSS -->
+<link rel="stylesheet"
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+<title>Employee Manager</title>
+</head>
+<body>
+	<div class="row" layout:fragment="content">
+		<div class="col-md-12">
+
+			<table data-toggle="table" class="table table-striped">
+				<thead>
+					<tr>
+						<th colspan="6">
+							<form th:action="@{/searchEmployees}" method="post">
+								<div class="inputgroup">
+								  <input type="text" th:value="${searchString}" class="form-control" placeholder="Filtertext" name="searchString">
+								  <div class="input-group-append">
+								    <button class="btn btn-outline-secondary" type="submit">
+								    	Filter
+								    </button>
+								  </div>
+								</div>
+							</form>
+						</th>
+					</tr>
+				</thead>
+				<thead>
+					<tr>
+						<th data-sortable="true">SSN</th>
+						<th data-sortable="true">First Name</th>
+						<th data-sortable="true">Last Name</th>
+						<th data-sortable="true">Day of birth</th>
+						<th data-sortable="true">Age</th>
+						<th class="text-right">Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+					<!-- insert the table content here -->
+
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

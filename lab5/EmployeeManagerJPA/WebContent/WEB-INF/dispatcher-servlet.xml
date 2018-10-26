@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/aop 
+		http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/tx 
+		http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+		http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util 
+		http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context.xsd">
+<!-- starting from scratch is not simple, one can use this shit -->
+
+	<!-- Read settings from external file and replace all ${...} in the xml -->
+	<context:property-placeholder location="classpath:db.properties" /> 
+	<!--	classpath: set of folders where spring will look for. Best place is the "src"-folder -> will be put to class
+			folder -->
+
+
+	<!-- - POJOs labeled with the @Controller and @Service annotations are auto-detected. -->
+	<context:component-scan base-package="at.fh.swenga" />
+
+	<!-- JSR-303/JSR-349 support will be detected on classpath and enabled automatically -->
+	<mvc:annotation-driven /><!-- a lot happens behind this tag -> ENABLE IT !!! -->
+
+	<mvc:default-servlet-handler/><!-- enabling this, requests that cannot be resolved are delegated to tomcat -->
+
+	<bean id="templateResolver"
+		class="org.thymeleaf.spring5.templateresolver.SpringResourceTemplateResolver">
+		<property name="prefix" value="/WEB-INF/templates/" />
+		<property name="suffix" value=".html" />
+		<property name="templateMode" value="HTML5" />
+		<property name="cacheable" value="false" />
+	</bean>
+
+	<bean id="templateEngine" class="org.thymeleaf.spring5.SpringTemplateEngine">
+		<property name="templateResolver" ref="templateResolver" />
+		<property name="enableSpringELCompiler" value="true" />
+	</bean>
+
+	<bean class="org.thymeleaf.spring5.view.ThymeleafViewResolver">
+		<property name="templateEngine" ref="templateEngine" />
+	</bean>
+
+	<!-- information for database -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="${db.url}" />
+		<property name="username" value="${db.username}" />
+		<property name="password" value="${db.password}" />
+		<property name="initialSize" value="2" />
+		<property name="maxTotal" value="5" />
+	</bean>
+
+	<bean
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		id="entityManagerFactory">
+		<property name="dataSource" ref="dataSource" />
+		<property name="packagesToScan" value="at.fh.swenga" /> <!-- componentScan for Entities, makes sense if you want to use 2
+		entity managers, e.g. for 2 different data bases -->
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" /><!-- for real jpa implementation use hibernate -->
+		</property>
+		<property name="jpaProperties"><!-- parse this information to hibernate -->
+			<props>
+				<!-- validate: validate the schema, makes no changes to the database. 
+					update: update the schema. create: creates the schema, destroying previous 
+					data. create-drop: drop the schema at the end of the session. validate: hibernate looks if objects in app and data in db is the same
+					important before delivering/presenting the project -->
+				<prop key="hibernate.hbm2ddl.auto">create-drop</prop><!-- if u open hibernate it will create everything, if u close it it will destroy everything -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.show_sql">true</prop><!-- shows the SQL statement -->
+			</props>
+		</property>
+	</bean>
+
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"><!-- enables transaction handling -->
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	<tx:annotation-driven />
+	<bean id="persistenceExceptionTranslationPostProcessor"
+		class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+</beans>
